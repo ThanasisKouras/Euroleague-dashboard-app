@@ -105,7 +105,7 @@ def main():
     # Display KPIs in a row with st.success
     col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-    box_style = "border: 0px solid #ddd; padding: 15px; background-color: #013220; height: 130px; margin: 0px 5px 5px 0px; border-radius: 7px;"
+    box_style = "border: 0px solid #ddd; padding: 15px; background-color: rgba(1, 32, 32, 0.4); height: 130px; margin: 0px 5px 5px 0px; border-radius: 7px;"
 
     with col1:
         st.markdown(
@@ -147,7 +147,7 @@ def main():
     # Display KPIs in a row with st.success for opponent-team-totals
     col7, col8, col9, col10, col11, col12 = st.columns(6)
 
-    box_style2 = "border: 0px solid #ddd; padding: 15px; background-color: #580000; height: 130px; margin: 0px 5px 5px 0px; border-radius: 7px;"
+    box_style2 = "border: 0px solid #ddd; padding: 15px; background-color: rgba(88, 0, 0, 0.4); height: 130px; margin: 0px 5px 5px 0px; border-radius: 7px;"
 
     with col7:
         st.markdown(
