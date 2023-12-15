@@ -263,7 +263,7 @@ def main():
 
     # Add a "Made by" section at the bottom
     st.markdown("---")
-    made_by_text = "Made by: [Your Name](https://www.yourwebsite.com)"
+    made_by_text = "Made by: Athanasios Kouras"
     st.markdown(made_by_text, unsafe_allow_html=True)
 
 if __name__ == "__main__":
