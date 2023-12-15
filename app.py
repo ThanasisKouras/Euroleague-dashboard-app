@@ -79,7 +79,7 @@ def main():
     logo_path = "images.png"  # Replace with the actual path to your logo image
     #st.image(logo_path, width=200,)
 
-    st.caption('This is a analytics Dashboard aimed to quickly provide a general knowledge & analytics view on some of the most important metrics for each team playing in Euroleague.')
+    st.caption('This is an analytics Dashboard aimed to quickly provide a general knowledge & analytics view on some of the most important metrics for each team playing in Euroleague.')
 
 
     # Load data from Excel files
