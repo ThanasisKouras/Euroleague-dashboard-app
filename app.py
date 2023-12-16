@@ -68,7 +68,7 @@ team_logos = load_team_logos(logos_folder_path)
 def main():
 
 
-    st.set_page_config(page_title="Euroleague Dashboard", page_icon =":basketball:")
+    st.set_page_config(page_title="Euroleague Dashboard", page_icon =":basketball:", layout="wide")
 
 
 
@@ -105,37 +105,37 @@ def main():
     # Display KPIs in a row with st.success
     col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-    box_style = "border: 0px solid #ddd; padding: 15px; background-color: rgba(1, 32, 32, 0.4); height: 130px; margin: 0px 5px 5px 0px; border-radius: 7px;"
+    box_style = "border: 0px solid #ddd; padding: 15px; background-color: rgba(1, 32, 32, 0.9); height: 130px; margin: 0px 5px 5px 0px; border-radius: 7px;"
 
     with col1:
         st.markdown(
-            f"<div style='{box_style}'><p style='font-size:12px;'>POINTS PER GAME</p><p style='font-size:24px;'>{team_kpis['PPG']:.1f}</p></div>",
+            f"<div style='{box_style}'><p style='font-size:15px;'>POINTS PER GAME</p><p style='font-size:28px;'>{team_kpis['PPG']:.1f}</p></div>",
             unsafe_allow_html=True)
 
 
     with col2:
         st.markdown(
-            f"<div style='{box_style}'><p style='font-size:12px;'>FIELD GOALS PERCENTAGE</p><p style='font-size:24px;'>{team_kpis['FG%']*100:.1f}%</p></div>",
+            f"<div style='{box_style}'><p style='font-size:15px;'>FIELD GOALS PERCENTAGE</p><p style='font-size:28px;'>{team_kpis['FG%']*100:.1f}%</p></div>",
             unsafe_allow_html=True)
 
     with col3:
         st.markdown(
-            f"<div style='{box_style}'><p style='font-size:12px;'>3 POINTS PERCENTAGE</p><p style='font-size:24px;'>{team_kpis['3P%']*100:.1f}%</p></div>",
+            f"<div style='{box_style}'><p style='font-size:15px;'>3 POINTS PERCENTAGE</p><p style='font-size:28px;'>{team_kpis['3P%']*100:.1f}%</p></div>",
             unsafe_allow_html=True)
 
     with col4:
         st.markdown(
-            f"<div style='{box_style}'><p style='font-size:12px;'>3 POINTS MADE</p><p style='font-size:24px;'>{team_kpis['3PM']:.1f}</p></div>",
+            f"<div style='{box_style}'><p style='font-size:15px;'>3 POINTS MADE</p><p style='font-size:28px;'>{team_kpis['3PM']:.1f}</p></div>",
             unsafe_allow_html=True)
 
     with col5:
         st.markdown(
-            f"<div style='{box_style}'><p style='font-size:12px;'>DEFENSIVE REBOUNDS</p><p style='font-size:24px;'>{team_kpis['DRB']:.2f}</p></div>",
+            f"<div style='{box_style}'><p style='font-size:15px;'>DEFENSIVE REBOUNDS</p><p style='font-size:28px;'>{team_kpis['DRB']:.2f}</p></div>",
             unsafe_allow_html=True)
 
     with col6:
         st.markdown(
-            f"<div style='{box_style}'><p style='font-size:12px;'>OFFENSIVE REBOUNDS</p><p style='font-size:24px;'>{team_kpis['ORB']:.2f}</p></div>",
+            f"<div style='{box_style}'><p style='font-size:15px;'>OFFENSIVE REBOUNDS</p><p style='font-size:28px;'>{team_kpis['ORB']:.2f}</p></div>",
             unsafe_allow_html=True)
 
     # Display KPIs for the opponent team vs selected team
@@ -147,41 +147,41 @@ def main():
     # Display KPIs in a row with st.success for opponent-team-totals
     col7, col8, col9, col10, col11, col12 = st.columns(6)
 
-    box_style2 = "border: 0px solid #ddd; padding: 15px; background-color: rgba(88, 0, 0, 0.4); height: 130px; margin: 0px 5px 5px 0px; border-radius: 7px;"
+    box_style2 = "border: 0px solid #ddd; padding: 15px; background-color: rgba(88, 0, 0, 0.9); height: 130px; margin: 0px 5px 5px 0px; border-radius: 7px;"
 
     with col7:
         st.markdown(
-            f"<div style='{box_style2}'><p style='font-size:12px;'>POINTS PER GAME</p><p style='font-size:24px;'>{opponent_kpis['PPG']:.1f}</p></div>",
+            f"<div style='{box_style2}'><p style='font-size:15px;'>POINTS PER GAME</p><p style='font-size:28px;'>{opponent_kpis['PPG']:.1f}</p></div>",
             unsafe_allow_html=True)
 
     with col8:
         st.markdown(
-            f"<div style='{box_style2}'><p style='font-size:12px;'>FIELD GOALS PERCENTAGE</p><p style='font-size:24px;'>{opponent_kpis['FG%'] * 100:.1f}%</p></div>",
+            f"<div style='{box_style2}'><p style='font-size:15px;'>FIELD GOALS PERCENTAGE</p><p style='font-size:28px;'>{opponent_kpis['FG%'] * 100:.1f}%</p></div>",
             unsafe_allow_html=True)
 
     with col9:
         st.markdown(
-            f"<div style='{box_style2}'><p style='font-size:12px;'>3 POINTS PERCENTAGE</p><p style='font-size:24px;'>{opponent_kpis['3P%'] * 100:.1f}%</p></div>",
+            f"<div style='{box_style2}'><p style='font-size:15px;'>3 POINTS PERCENTAGE</p><p style='font-size:28px;'>{opponent_kpis['3P%'] * 100:.1f}%</p></div>",
             unsafe_allow_html=True)
 
     with col10:
         st.markdown(
-            f"<div style='{box_style2}'><p style='font-size:12px;'>3 POINTS MADE</p><p style='font-size:24px;'>{opponent_kpis['3PM']:.1f}</p></div>",
+            f"<div style='{box_style2}'><p style='font-size:15px;'>3 POINTS MADE</p><p style='font-size:28px;'>{opponent_kpis['3PM']:.1f}</p></div>",
             unsafe_allow_html=True)
 
     with col11:
         st.markdown(
-            f"<div style='{box_style2}'><p style='font-size:12px;'>DEFENSIVE REBOUNDS</p><p style='font-size:24px;'>{opponent_kpis['DRB']:.1f}</p></div>",
+            f"<div style='{box_style2}'><p style='font-size:15px;'>DEFENSIVE REBOUNDS</p><p style='font-size:28px;'>{opponent_kpis['DRB']:.1f}</p></div>",
             unsafe_allow_html=True)
 
     with col12:
         st.markdown(
-            f"<div style='{box_style2}'><p style='font-size:12px;'>OFFENSIVE REBOUNDS</p><p style='font-size:24px;'>{opponent_kpis['ORB']:.2f}</p></div>",
+            f"<div style='{box_style2}'><p style='font-size:15px;'>OFFENSIVE REBOUNDS</p><p style='font-size:28px;'>{opponent_kpis['ORB']:.2f}</p></div>",
             unsafe_allow_html=True)
 
 
 # Display top players tables
-    st.header("Top 5 Players Categorized by :", divider='orange')
+    st.header(f"Top 5 Players for {selected_team} categorized by :", divider='orange')
 
     # Create a 2x2 grid layout for top players
     top_players_layout = st.columns(2)
@@ -223,7 +223,7 @@ def main():
         })
 
     sns.set_theme(style="whitegrid")
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(12, 6))
     ax = sns.barplot(x='PPG', y='Category', data=chart_data, palette=['#2ca02c', '#d62728'],)
 
     # Add labels
@@ -231,7 +231,7 @@ def main():
         width = p.get_width()
         plt.text(width, p.get_y() + p.get_height() / 5, f'{width:.1f}', ha="left", va="center")
 
-    plt.title(f"PPG Scored VS Conceded for {selected_team}")
+    plt.title(f"Point per Game Scored VS Conceded for {selected_team}")
     plt.xlabel("PPG")
     plt.ylabel("")
 
@@ -246,11 +246,11 @@ def main():
     scoring_distribution_team_totals = get_scoring_distribution(df, selected_team)
 
     # Create a vertical bar plot using Seaborn for team totals
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 6))
     sns.barplot(x='Player', y='Percentage of Total Points', data=scoring_distribution_team_totals, palette='viridis')
     plt.xlabel('Player')
     plt.ylabel('Percentage of Total Points')
-    plt.title(f'Scoring Distribution for Team : {selected_team} ')
+    plt.title(f'Scoring Distribution for {selected_team} ')
     plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
 
     # Access the Matplotlib figure
@@ -263,7 +263,7 @@ def main():
 
     # Add a "Made by" section at the bottom
     st.markdown("---")
-    made_by_text = "Made by: Athanasios Kouras"
+    made_by_text = "Made by: [Athanasios Kouras]()"
     st.markdown(made_by_text, unsafe_allow_html=True)
 
 if __name__ == "__main__":
