@@ -266,5 +266,29 @@ def main():
     made_by_text = "Made by: [Athanasios Kouras]()"
     st.markdown(made_by_text, unsafe_allow_html=True)
 
+    tab_info = st.sidebar.checkbox('Show Standings')
+
+    # Display information when the tab is clicked
+    if tab_info:
+        # Create the DataFrame
+        info_data = {
+            'Team': ['RMB', 'FCB', 'BOL', 'PAR',
+                     'ASM', 'BASK', 'VAL', 'MAC',
+                     'PAN', 'OLY', 'FEN',
+                     'EFE',
+                     'BAY', 'CVE', 'MIL',
+                     'ZAL',
+                     'LYV', 'BER'],
+            'Games Played': [14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14],
+            'Win': [13, 10, 10, 8, 8, 8, 8, 8, 7, 7, 7, 7, 6, 5, 5, 5, 2, 2],
+            'Loss': [1, 4, 4, 6, 6, 6, 6, 6, 7, 7, 7, 7, 8, 9, 9, 9, 12, 12]
+
+        }
+
+        info_table = pd.DataFrame(info_data)
+
+        # Display the table in the sidebar
+        st.sidebar.table(info_table)
+
 if __name__ == "__main__":
     main()
