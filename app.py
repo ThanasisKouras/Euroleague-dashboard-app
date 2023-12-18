@@ -281,6 +281,10 @@ def main():
     with col9:
         selected_team_last_5_form = \
         team_standings_df.loc[team_standings_df['club.tvCode'] == selected_team, 'last5Form'].values[0]
+        
+        # Remove single quotes, square brackets from the string
+        selected_team_last_5_form = selected_team_last_5_form.replace("'", "").replace("[", "").replace("]", "")
+    
         st.markdown(
             f"<div style='{box_style5}'><p style='font-size:18px;'>LAST FIVE GAME (W - L)</p><p style='font-size:30px;'>{selected_team_last_5_form}</p></div>",
             unsafe_allow_html=True
