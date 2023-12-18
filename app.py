@@ -155,6 +155,8 @@ def main():
 
     st.caption('This is an analytics Dashboard aimed to quickly provide a general knowledge on some of the most important metrics for each team playing in Euroleague.')
 
+    st.info('All data shown are from [euroleague-api](https://pypi.org/project/euroleague-api/)', icon="ℹ️")
+    
     # Load data from Excel files
     #team_standings_df, team_totals_data, opponent_totals_data = load_data()
 
