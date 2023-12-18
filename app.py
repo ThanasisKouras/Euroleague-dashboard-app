@@ -372,7 +372,7 @@ def main():
     fig2 = plt.gcf()
 
     # Set the background color
-    fig2.patch.set_facecolor('#F0F0F0')  # Replace with your desired color
+    fig2.patch.set_facecolor('#ffffff')  # Replace with your desired color
 
     # Save the Matplotlib figure to a BytesIO object
     img_buf = io.BytesIO()
