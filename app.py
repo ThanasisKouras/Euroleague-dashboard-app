@@ -38,12 +38,17 @@ def refresh_data():
 
 
     now = datetime.now()
+    last_refresh_time = now.strftime("%H:%M:%S")
+
+    # Display the last refresh time in the Streamlit app
+    st.info(
+        f'All data used for calculations are from [euroleague-api](https://pypi.org/project/euroleague-api/), refreshing automatically. Latest refresh: {last_refresh_time}',
+        icon="ℹ️")
 
     current_time = now.strftime("%H:%M:%S")
     print("Current Time =", current_time)
 
     return team_standings_df, team_totals_data, players_data
-    # You may need to update your Streamlit display functions to use the refreshed data
 
 def get_team_kpis(team_totals_data, selected_team):
     # Get the KPIs for the selected team
@@ -155,7 +160,6 @@ def main():
 
     st.caption('This is an analytics Dashboard aimed to quickly provide a general knowledge on some of the most important metrics for each team playing in Euroleague.')
 
-    st.info('All data shown are from [euroleague-api](https://pypi.org/project/euroleague-api/)', icon="ℹ️")
     
     # Load data from Excel files
     #team_standings_df, team_totals_data, opponent_totals_data = load_data()
