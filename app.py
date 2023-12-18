@@ -346,7 +346,8 @@ def main():
         st.table(top_spg_players.style.format({'Steals': '{:.2f}'}))
 
 
-    st.header("Charts for {selected_team} ", divider='orange')
+
+    st.header(f"Charts for {selected_team}", divider='orange')
     
     # Get scoring distribution for selected team from team totals
     scoring_distribution_team_totals = get_scoring_distribution(players_data, selected_team)
