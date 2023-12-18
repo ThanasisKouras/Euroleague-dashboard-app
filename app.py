@@ -174,6 +174,16 @@ def main():
     # Display team logo in the sidebar
     display_team_logo(team_logos, selected_team)
 
+    # Button to show/hide standings table
+    show_standings_button = st.sidebar.button("Show Standings")
+
+
+    # Check if the button is clicked and show the standings table in the sidebar
+    if show_standings_button:
+        st.sidebar.table(team_standings_df[['position', 'club.editorialName', 'gamesPlayed']].rename(
+            columns={'position': 'Position', 'club.editorialName': 'Team', 'gamesPlayed': 'Games'}
+        ).set_index('Position', drop=True))
+
     # Display KPIs for the selected team
     st.header(f"Team Stats for {selected_team} (on Average)", divider='orange')
 
@@ -370,7 +380,7 @@ def main():
 
     # Add a "Made by" section at the bottom
     st.markdown("---")
-    made_by_text = "Made by: [Your Name](https://www.yourwebsite.com)"
+    made_by_text = "Made by: [Athanasios Kouras]()"
     st.markdown(made_by_text, unsafe_allow_html=True)
 
 
