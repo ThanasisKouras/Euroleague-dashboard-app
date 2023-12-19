@@ -8,7 +8,7 @@ pd.set_option('display.max_columns', None)
 
 #Team Standings
 season=2023
-round_number=14
+round_number=15
 endpoint='basicstandings'
 
 team_standings_df = get_standings(season, round_number+1, endpoint)
