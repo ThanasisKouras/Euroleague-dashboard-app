@@ -42,13 +42,14 @@ def refresh_data():
 
     # Display the last refresh time in the Streamlit app
     st.info(
-        f'All data used for calculations are from [euroleague-api](https://pypi.org/project/euroleague-api/), refreshing automatically. Latest refresh: {last_refresh_time}',
+        f'All data used for calculations are from [euroleague-api](https://pypi.org/project/euroleague-api/), refreshing automatically. Last refresh: {last_refresh_time}',
         icon="ℹ️")
 
     current_time = now.strftime("%H:%M:%S")
     print("Current Time =", current_time)
 
     return team_standings_df, team_totals_data, players_data
+
 
 def get_team_kpis(team_totals_data, selected_team):
     # Get the KPIs for the selected team
@@ -99,6 +100,11 @@ def get_top_players(players_data, selected_team, metric, display_name, top_n=5):
 
     return top_players[['Player', display_name]]
 
+# Function to get top players based on PIR
+def get_top_players_pir(players_data, selected_team, top_n=3):
+    team_data = players_data[players_data['player.team.tvCodes'] == selected_team]
+    top_players = team_data.nlargest(top_n, 'pir')
+    return top_players[['player.name', 'pir', 'player.imageUrl','pointsScored', 'totalRebounds', 'assists', 'steals']]  # Directly use 'player.imageUrl'
 
 # Function to get scoring distribution
 def get_scoring_distribution(players_data, selected_team):
@@ -128,39 +134,25 @@ logos_folder_path = "logos"
 
 # Load team logos
 team_logos = load_team_logos(logos_folder_path)
+
+
 def main():
 
 
     st.set_page_config(page_title="Euroleague Dashboard", page_icon =":basketball:", layout='wide')
-
-    # Add custom CSS to set a light theme
-    light_theme_css = """
-        <style>
-            body {
-                background-color: white;
-                color: black;
-            }
-            .sidebar .sidebar-content {
-                background-color: #f5f5f5;
-            }
-            .css-vfskoc {
-                background-color: #f5f5f5;
-            }
-        </style>
-    """
-
-    st.markdown(light_theme_css, unsafe_allow_html=True)
 
     # Apply the custom CSS
     st.markdown(custom_css, unsafe_allow_html=True)
 
     st.title(":basketball: :orange[Euroleague Dashboard ] :basketball:")
     logo_path = "images.png"  # Replace with the actual path to your logo image
-    #st.image(logo_path, width=200,)
+
+
+
 
     st.caption('This is an analytics Dashboard aimed to quickly provide a general knowledge on some of the most important metrics for each team playing in Euroleague.')
 
-    
+
     # Load data from Excel files
     #team_standings_df, team_totals_data, opponent_totals_data = load_data()
 
@@ -179,6 +171,7 @@ def main():
 
     # Display team logo in the sidebar
     display_team_logo(team_logos, selected_team)
+
 
     # Button to show/hide standings table
     show_standings_button = st.sidebar.button("Show Standings")
@@ -199,11 +192,17 @@ def main():
     # Display KPIs in a row with st.success
     col1, col2, col3, col4, col5, col6 = st.columns(6)
 
-    box_style = "border: 1px solid #32612D; padding: 15px; background-color: #ececec; height: 130px; width: 100%; margin: 0px auto; border-radius: 7px;"
-    box_style6 = "border: 0px solid #ddd; padding: 15px; background-color: #ffff; height: 80px; width: 100%; margin: 0px auto; border-radius: 25px;"
+    box_style = "border: 1px solid #32612D; padding: 15px; background-color: rgba(206,206,206, 0.3); height: 130px; width: 100%; margin: 0px auto; border-radius: 7px;"
+    box_style6 = "border: 0px solid #ddd; padding: 15px; background-color: rgba(255,255,255, 0.3); height: 60px; width: 100%; margin: 10px auto; border-radius: 25px;"
 
+    selected_team_data = team_standings_df[team_standings_df['club.tvCode'] == selected_team]
+
+    # Calculate the average for 'pointsFor' and 'pointsAgainst'
+    avg_points_for = selected_team_data['pointsFor'].sum() / selected_team_data['gamesPlayed'].sum()
+    
     with col1:
-        points_per_game_html = f"<div style='{box_style}'><p style='font-size:16px;'>POINTS PER GAME</p><p style='font-size:28px;'>{team_kpis['pointsScored']:.1f}</p></div>"
+
+        points_per_game_html = f"<div style='{box_style}'><p style='font-size:16px;'>POINTS PER GAME</p><p style='font-size:28px;'>{avg_points_for:.1f}</p></div>"
         points_per_game_ranking_html = f"<div style='{box_style6}'><p style='font-size:16px;'>RANKING : {team_kpis['pointsScored_Ranking']:}</p></div>"
 
         st.markdown(points_per_game_html, unsafe_allow_html=True)
@@ -255,10 +254,10 @@ def main():
     # Display KPIs in a row with st.success
     col7, col8, col9, col10 = st.columns(4)
 
-    box_style2 = "border: 1px solid #ddd; padding: 15px; background-color: #ffff; height: 130px; width: 80%; margin: 15px auto; border-radius: 7px;"
-    box_style3 = "border: 2px solid #32612D; padding: 15px; background-color: #ececec; height: 130px; width: 80%; margin: 15px auto; border-radius: 7px;"
-    box_style4 = "border: 2px solid #FF0000; padding: 15px; background-color: #ececec; height: 130px; width: 80%; margin: 15px auto; border-radius: 7px;"
-    box_style5 = "border: 2px solid #ddd; padding: 15px; background-color: #ffff; height: 180px; width: 80%; margin: 15px auto; border-radius: 7px;"
+    box_style2 = "border: 1px solid #ddd; padding: 15px; background-color: rgba(255,255,255,0.1); height: 130px; width: 80%; margin: 10px auto; border-radius: 7px;"
+    box_style3 = "border: 2px solid #32612D; padding: 15px; background-color: rgba(206,206,206, 0.3); height: 130px; width: 100%; margin: 10px auto; border-radius: 7px;"
+    box_style4 = "border: 2px solid #FF0000; padding: 15px; background-color: rgba(206,206,206, 0.3); height: 130px; width: 100%; margin: 10px auto; border-radius: 7px;"
+    box_style5 = "border: 1px solid #ddd; padding: 15px; background-color: rgba(255,255,255,0.1); height: 180px; width: 80%; margin: 10px auto; border-radius: 7px;"
 
     with col7:
         selected_team_games_won = \
@@ -278,19 +277,17 @@ def main():
         )
 
     with col8:
-        fouls_commited_html = f"<div style='{box_style2}'><p style='font-size:18px;'>HOME RECORD</p><p style='font-size:30px;'>{team_standings_df.loc[team_standings_df['club.tvCode'] == selected_team, 'homeRecord'].iloc[0]}</p></div>"
-        fouls_drawn_html = f"<div style='{box_style2}'><p style='font-size:18px;'>AWAY RECORD</p><p style='font-size:30px;'>{team_standings_df.loc[team_standings_df['club.tvCode'] == selected_team, 'awayRecord'].iloc[0]}</p></div>"
+        home_record_html = f"<div style='{box_style2}'><p style='font-size:18px;'>HOME RECORD</p><p style='font-size:30px;'>{team_standings_df.loc[team_standings_df['club.tvCode'] == selected_team, 'homeRecord'].iloc[0]}</p></div>"
+        away_record_html = f"<div style='{box_style2}'><p style='font-size:18px;'>AWAY RECORD</p><p style='font-size:30px;'>{team_standings_df.loc[team_standings_df['club.tvCode'] == selected_team, 'awayRecord'].iloc[0]}</p></div>"
 
-        st.markdown(fouls_commited_html, unsafe_allow_html=True)
-        st.markdown(fouls_drawn_html, unsafe_allow_html=True)
+        st.markdown(home_record_html, unsafe_allow_html=True)
+        st.markdown(away_record_html, unsafe_allow_html=True)
 
     with col9:
         selected_team_last_5_form = \
         team_standings_df.loc[team_standings_df['club.tvCode'] == selected_team, 'last5Form'].values[0]
-        
         # Remove single quotes, square brackets from the string
         selected_team_last_5_form = selected_team_last_5_form.replace("'", "").replace("[", "").replace("]", "")
-    
         st.markdown(
             f"<div style='{box_style5}'><p style='font-size:18px;'>LAST FIVE GAME (W - L)</p><p style='font-size:30px;'>{selected_team_last_5_form}</p></div>",
             unsafe_allow_html=True
@@ -324,6 +321,45 @@ def main():
         # Display the bar chart
         st.pyplot(fig)
 
+    # Add a row with three columns to show top players based on PIR
+    st.header(f"Top 3 Players Based on PIR (Performance Index Rating) for {selected_team}", divider='orange')
+
+    # Create a 1x3 grid layout for top players
+    top_players_layout = st.columns(3)
+
+    # Get top players based on PIR
+    top_pir_players = get_top_players_pir(players_data, selected_team)
+
+    # Display top players in each column
+    for i, (col, player_info) in enumerate(zip(top_players_layout, top_pir_players.iterrows())):
+        col.subheader(f"#{i + 1} {player_info[1]['player.name']}")
+
+        # Create a box with player image, PIR, and additional statistics
+        with col:
+            st.image(player_info[1]['player.imageUrl'],
+                     width=130)  # Display player image with a maximum width of 100 pixels
+
+            # Display PIR value with font size 20 and bold
+            st.markdown(f"<p style='font-size: 22px;'><strong>PIR: {player_info[1]['pir']:.2f}</strong></p>",
+                        unsafe_allow_html=True)
+
+            # Convert percentage string to numeric for formatting
+            avg_points = float(player_info[1]['pointsScored'])
+            avg_rebounds = float(player_info[1]['totalRebounds'])
+            avg_assists = float(player_info[1]['assists'])
+
+            # Calculate total of average points, rebounds, and assists
+            total_avg = avg_points + avg_rebounds + avg_assists
+
+            # Display additional statistics with font size 15
+            st.markdown(f"Avg Points: {avg_points:.2f}", unsafe_allow_html=True)
+            st.markdown(f"Avg Rebounds: {avg_rebounds:.2f}", unsafe_allow_html=True)
+            st.markdown(f"Avg Assists: {avg_assists:.2f}", unsafe_allow_html=True)
+            # Display total of average points, rebounds, and assists
+            st.markdown(f"**Total Pts/Rebs/Asts: {total_avg:.2f}**", unsafe_allow_html=True)
+
+            st.divider()
+
 
 # Display top players tables
     st.header("Top 5 Players Categorized by :", divider='orange')
@@ -355,10 +391,6 @@ def main():
         top_spg_players = get_top_players(players_data, selected_team, 'steals', 'Steals')
         st.table(top_spg_players.style.format({'Steals': '{:.2f}'}))
 
-
-
-    st.header(f"Charts for {selected_team}", divider='orange')
-    
     # Get scoring distribution for selected team from team totals
     scoring_distribution_team_totals = get_scoring_distribution(players_data, selected_team)
 
@@ -382,7 +414,7 @@ def main():
     fig2 = plt.gcf()
 
     # Set the background color
-    fig2.patch.set_facecolor('#ffffff')  # Replace with your desired color
+    fig2.patch.set_facecolor('#F0F0F0')  # Replace with your desired color
 
     # Save the Matplotlib figure to a BytesIO object
     img_buf = io.BytesIO()
