@@ -10,8 +10,8 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@3
-
+      uses: actions/@latest
+      
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
