@@ -3,6 +3,8 @@ name: Run API Test Euroleague
 on:
   schedule:
     - cron: '0 * * * *'  # Run every hour on the hour
+    
+  workflow_dispatch:
 
 jobs:
   run_api_test:
