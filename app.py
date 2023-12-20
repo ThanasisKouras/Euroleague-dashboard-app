@@ -50,7 +50,7 @@ def get_api_data(season, round_number):
 @repeat(every(30).seconds)
 def refresh_data():
     # Reload the data using your get_api_data() function or any other data loading process you have
-    team_standings_df, team_stats_df, player_df = get_api_data(season=2023, round_number=15)
+    team_standings_df, team_stats_df, player_df = get_api_data(season=2023, round_number=13)
 
     now = datetime.now()
     last_refresh_time = now.strftime("%H:%M:%S")
