@@ -11,7 +11,7 @@ season=2023
 round_number=15
 endpoint='basicstandings'
 
-team_standings_df = get_standings(season, round_number+1, endpoint)
+team_standings_df = get_standings(season, round_number, endpoint)
 
 
 
