@@ -19,36 +19,50 @@ body {
 """
 
 
-def load_data():
-    file_path = "team_standings.xlsx"  # Replace with your actual file name
-    team_standings_df = pd.read_excel(file_path)
+# Additional imports for API calls
+import pandas as pd
+from euroleague_api.standings import get_standings
+from euroleague_api.player_stats import get_player_stats_single_season
+from euroleague_api.team_stats import get_team_stats_single_season
 
-    team_totals_file_path = "team_stats.xlsx"
-    team_totals_data = pd.read_excel(team_totals_file_path)
 
-    players_file_path = "player_stats.xlsx"
-    players_data = pd.read_excel(players_file_path)
 
-    return team_standings_df, team_totals_data, players_data
+# Function to get data from the API
+def get_api_data(season, round_number):
+    # Team Standings
+    endpoint_standings = 'basicstandings'
+    team_standings_df = get_standings(season, round_number, endpoint_standings)
+
+    # Team Stats
+    endpoint_team_stats = "traditional"
+    phase_type_code = None
+    statistic_mode = "PerGame"
+    team_stats_df = get_team_stats_single_season(endpoint_team_stats, season, phase_type_code, statistic_mode)
+
+    # Player Stats
+    endpoint_player_stats = "traditional"
+    phase_type_code = None
+    statistic_mode = "PerGame"
+    player_df = get_player_stats_single_season(endpoint_player_stats, season, phase_type_code, statistic_mode)
+
+    return team_standings_df, team_stats_df, player_df
 
 @repeat(every(30).seconds)
 def refresh_data():
-    # Reload the data using your load_data() function or any other data loading process you have
-    team_standings_df, team_totals_data, players_data = load_data()
-
+    # Reload the data using your get_api_data() function or any other data loading process you have
+    team_standings_df, team_stats_df, player_df = get_api_data(season=2023, round_number=15)
 
     now = datetime.now()
     last_refresh_time = now.strftime("%H:%M:%S")
+    print("Current Time =", last_refresh_time)
 
     # Display the last refresh time in the Streamlit app
     st.info(
-        f'All data used for calculations are from [euroleague-api](https://pypi.org/project/euroleague-api/), refreshing automatically. Last refresh: {last_refresh_time}',
+        f'All data used for calculations are fetched from [euroleague-api](https://pypi.org/project/euroleague-api/), refreshing automatically. Last refresh: {last_refresh_time}',
         icon="ℹ️")
 
-    current_time = now.strftime("%H:%M:%S")
-    print("Current Time =", current_time)
-
-    return team_standings_df, team_totals_data, players_data
+    return team_standings_df, team_stats_df, player_df
+    # You may need to update your Streamlit display functions to use the refreshed data
 
 
 def get_team_kpis(team_totals_data, selected_team):
@@ -199,7 +213,7 @@ def main():
 
     # Calculate the average for 'pointsFor' and 'pointsAgainst'
     avg_points_for = selected_team_data['pointsFor'].sum() / selected_team_data['gamesPlayed'].sum()
-    
+
     with col1:
 
         points_per_game_html = f"<div style='{box_style}'><p style='font-size:16px;'>POINTS PER GAME</p><p style='font-size:28px;'>{avg_points_for:.1f}</p></div>"
@@ -287,7 +301,8 @@ def main():
         selected_team_last_5_form = \
         team_standings_df.loc[team_standings_df['club.tvCode'] == selected_team, 'last5Form'].values[0]
         # Remove single quotes, square brackets from the string
-        selected_team_last_5_form = selected_team_last_5_form.replace("'", "").replace("[", "").replace("]", "")
+        selected_team_last_5_form = str(selected_team_last_5_form).replace("'", "").replace("[", "").replace("]", "")
+
         st.markdown(
             f"<div style='{box_style5}'><p style='font-size:18px;'>LAST FIVE GAME (W - L)</p><p style='font-size:30px;'>{selected_team_last_5_form}</p></div>",
             unsafe_allow_html=True
