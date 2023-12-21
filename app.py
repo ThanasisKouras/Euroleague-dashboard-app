@@ -28,6 +28,7 @@ from euroleague_api.team_stats import get_team_stats_single_season
 
 
 # Function to get data from the API
+@st.cache_data(ttl=86400)  # 86400 seconds = 1 day
 def get_api_data(season, round_number):
     # Team Standings
     endpoint_standings = 'basicstandings'
@@ -58,7 +59,7 @@ def refresh_data():
 
     # Display the last refresh time in the Streamlit app
     st.info(
-        f'All data used for calculations are fetched from [euroleague-api](https://pypi.org/project/euroleague-api/), refreshing automatically. Last refresh: {last_refresh_time}',
+        f'All data used for calculations are from [euroleague-api](https://pypi.org/project/euroleague-api/), refreshing automatically. Last refresh: {last_refresh_time}',
         icon="ℹ️")
 
     return team_standings_df, team_stats_df, player_df
@@ -90,9 +91,33 @@ def get_team_kpis(team_totals_data, selected_team):
     return team_kpis[['pointsScored', 'twoPointersPercentage', 'threePointersPercentage', 'threePointersMade',
                        'defensiveRebounds', 'offensiveRebounds', 'foulsCommited', 'foulsDrawn',
                       'pointsScored_Ranking', 'twoPointersPercentage_Ranking', 'threePointersPercentage_Ranking',
-                      'threePointersMade_Ranking', 'offensiveRebounds_Ranking', 'defensiveRebounds_Ranking',
-                      'foulsCommited_Ranking', 'foulsDrawn_Ranking']]
+                      'threePointersMade_Ranking', 'offensiveRebounds_Ranking', 'defensiveRebounds_Ranking','assists','turnovers']]
 
+def get_top_teams(team_totals_data):
+    # Create a dictionary to map original KPI names to display names
+    kpi_display_names = {
+        'pointsScored': 'POINTS PER GAME',
+        'twoPointersPercentage': 'FIELD GOALS PERCENTAGE',
+        'threePointersPercentage': '3 POINTS PERCENTAGE',
+        'threePointersMade': '3 POINTS MADE',
+        'defensiveRebounds': 'DEFENSIVE REBOUNDS',
+        'offensiveRebounds': 'OFFENSIVE REBOUNDS'
+    }
+
+    # Create a dictionary to store the top team for each metric
+    top_teams = {}
+
+    # Calculate the top team for each metric
+    for kpi, display_name in kpi_display_names.items():
+        # Get the top team for the current metric
+        top_team_row = team_totals_data.sort_values(by=kpi, ascending=False).iloc[0]
+        # Extract metric value and team name
+        metric_value = top_team_row[kpi]
+        team_name = top_team_row['team.tvCodes']
+        # Store the metric value and team name in the dictionary
+        top_teams[display_name] = (metric_value, team_name)
+
+    return top_teams
 
 
 def get_top_players(players_data, selected_team, metric, display_name, top_n=5):
@@ -167,12 +192,11 @@ def main():
     st.caption('This is an analytics Dashboard aimed to quickly provide a general knowledge on some of the most important metrics for each team playing in Euroleague.')
 
 
-    # Load data from Excel files
+
     #team_standings_df, team_totals_data, opponent_totals_data = load_data()
 
     # Load data from Excel files
     team_standings_df, team_totals, players_data = refresh_data()
-
 
 
     # List of teams as buttons
@@ -190,6 +214,29 @@ def main():
     # Button to show/hide standings table
     show_standings_button = st.sidebar.button("Show Standings")
 
+    # Get the top team for each metric
+    top_teams = get_top_teams(team_totals)
+
+    # Display the top team for each metric in the same format as the existing KPIs
+    st.header("Top Team for Each Metric (on Average)", divider='orange')
+
+    top_teams_layout = st.columns(6)
+
+    for i, (kpi, (metric_value, team_name)) in enumerate(top_teams.items()):
+        with top_teams_layout[i]:
+            box_style_metric = "border: 2px solid #8B4000; padding: 15px; background-color: rgba(206,206,206, 0.0); height: 130px; width: 100%; margin: 10px auto; border-radius: 2px;"
+            box_style_ranking = "border: 0px solid #ddd; padding: 15px; background-color: rgba(255,255,255, 0.0); height: 60px; width: 100%; margin: 10px auto; border-radius: 25px;"
+
+            # Check if metric_value is a numeric type
+            if isinstance(metric_value, (int, float)):
+                metric_html = f"<div style='{box_style_metric}'><p style='font-size:16px;'>{kpi}</p><p style='font-size:28px;'>{metric_value:.1f}</p></div>"
+            else:
+                metric_html = f"<div style='{box_style_metric}'><p style='font-size:16px;'>{kpi}</p><p style='font-size:28px;'>{metric_value}</p></div>"
+
+            ranking_html = f"<div style='{box_style_ranking}'><p style='font-size:16px;'>RANKING :1 ({team_standings_df['club.editorialName'].iloc[team_standings_df[team_standings_df['club.tvCode'] == team_name].index[0]]})</p></div>"
+
+            st.markdown(metric_html, unsafe_allow_html=True)
+            st.markdown(ranking_html, unsafe_allow_html=True)
 
     # Check if the button is clicked and show the standings table in the sidebar
     if show_standings_button:
@@ -311,30 +358,19 @@ def main():
     # 4th column with a bar chart
     with col10:
 
-        colors = ['#32612D','#FF0000']
-        # Filter the DataFrame for the selected team
-        selected_team_data = team_standings_df[team_standings_df['club.tvCode'] == selected_team]
+        # Calculate the ratio
+        if team_kpis['turnovers'] != 0:
+            ratio_value = team_kpis['assists'] / team_kpis['turnovers']
+        else:
+            ratio_value = 0  # or any other suitable value
 
-        # Calculate the average for 'pointsFor' and 'pointsAgainst'
-        avg_points_for = selected_team_data['pointsFor'].sum() / selected_team_data['gamesPlayed'].sum()
-        avg_points_against = selected_team_data['pointsAgainst'].sum() / selected_team_data['gamesPlayed'].sum()
+        # Combine AVG assists, AVG turnovers, and RATIO in the same box with RATIO on the next line
+        combined_html = f"<div style='{box_style5}'><p style='font-size:18px;'>AVG ASSISTS / AVG TURNOVERS</p><p style='font-size:30px;'>{team_kpis['assists']:.1f} / {team_kpis['turnovers']:.1f}</p><p style='font-size:16px;'>RATIO (higher = better): {ratio_value:.2f}</p></div>"
 
-        # Create a bar chart
-        fig, ax = plt.subplots()
-        ax.bar(['Points Scored', 'Points Conceded'], [avg_points_for, avg_points_against], color=colors)
+        # Display the combined box
+        st.markdown(combined_html, unsafe_allow_html=True)
 
-        # Add text labels on top of the bars
-        ax.text(0, avg_points_for, round(avg_points_for, 1), ha='center', va='bottom', fontsize=14, color='black')
-        ax.text(1, avg_points_against, round(avg_points_against, 1), ha='center', va='bottom', fontsize=14,
-                color='black')
 
-        # Customize the chart
-        ax.set_ylabel('Average Points')
-        ax.set_title(f'Average Points Scored and Conceded for {selected_team}')
-        ax.set_ylim(0, max(avg_points_for, avg_points_against) + 50)
-
-        # Display the bar chart
-        st.pyplot(fig)
 
     # Add a row with three columns to show top players based on PIR
     st.header(f"Top 3 Players Based on PIR (Performance Index Rating) for {selected_team}", divider='orange')
@@ -406,21 +442,78 @@ def main():
         top_spg_players = get_top_players(players_data, selected_team, 'steals', 'Steals')
         st.table(top_spg_players.style.format({'Steals': '{:.2f}'}))
 
+    # Display charts for the selected team
+    st.header(f"Charts for {selected_team} ", divider='orange')
     # Get scoring distribution for selected team from team totals
     scoring_distribution_team_totals = get_scoring_distribution(players_data, selected_team)
 
-    # Set the maximum width and height
-    max_width = 700
-    max_height = 650
+    # Set the maximum width and height for both charts
+    max_width = 800
+    max_height = 400
 
     # Create a vertical bar plot using Seaborn for team totals
     plt.figure(figsize=(min(max_width / 80, len(scoring_distribution_team_totals)), min(max_height / 6, 6)))
     sns.barplot(x='player.name', y='Percentage of Total Points', data=scoring_distribution_team_totals,
                 palette='viridis')
-    plt.xlabel('Player')
+    plt.xlabel('')
     plt.ylabel('Percentage of Total Points')
     plt.title(f'Scoring Distribution for Team: {selected_team}')
     plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
+
+    # Ensure tight layout
+    plt.tight_layout()
+
+    # Access the Matplotlib figure
+    fig1 = plt.gcf()
+
+    # Set the background color
+    fig1.patch.set_facecolor('#F0F0F0')  # Replace with your desired color
+
+    # Save the Matplotlib figure to a BytesIO object
+    img_buf1 = io.BytesIO()
+    fig1.savefig(img_buf1, format='png')
+    img_buf1.seek(0)
+
+    # Display the image with limited width using st.image
+    st.image(img_buf1, width=max_width)
+
+
+
+    # Filter the DataFrame for the selected team
+    selected_team_data = team_standings_df[team_standings_df['club.tvCode'] == selected_team]
+
+    st.divider()
+
+    # Calculate the average for 'pointsFor' and 'pointsAgainst'
+    avg_points_for = selected_team_data['pointsFor'].sum() / selected_team_data['gamesPlayed'].sum()
+    avg_points_against = selected_team_data['pointsAgainst'].sum() / selected_team_data['gamesPlayed'].sum()
+
+    # Combine the average points for and against into a DataFrame
+    avg_data = pd.DataFrame({
+        'Metric': ['Average Points Scored', 'Average Points Conceded'],
+        'Value': [avg_points_for, avg_points_against]
+    })
+
+    # Set a color palette for the bars
+    colors = ['#32612D', '#FF0000']
+
+    # Adjust the width of the bars (e.g., 0.8 for 80% of the available space)
+    bar_width = 0.4
+
+    # Create a vertical bar plot
+    plt.figure(figsize=(min(max_width / 80, len(scoring_distribution_team_totals)), min(max_height / 6, 6)))
+    sns.barplot(x='Metric', y='Value', data=avg_data, palette=colors, width=bar_width)
+
+    # Add labels to each bar
+    for i, value in enumerate(avg_data['Value']):
+        plt.text(i, value + 0.1, f'{value:.1f}', ha='center', va='bottom')
+
+    plt.xlabel(' ')
+    plt.ylabel('Average Points')
+    plt.title(f'Averages Points SCORED vs CONCEDED for Team: {selected_team}')
+
+    # Display the plot
+    plt.show()
 
     # Ensure tight layout
     plt.tight_layout()
@@ -432,18 +525,19 @@ def main():
     fig2.patch.set_facecolor('#F0F0F0')  # Replace with your desired color
 
     # Save the Matplotlib figure to a BytesIO object
-    img_buf = io.BytesIO()
-    fig2.savefig(img_buf, format='png')
-    img_buf.seek(0)
+    img_buf2 = io.BytesIO()
+    fig2.savefig(img_buf2, format='png')
+    img_buf2.seek(0)
 
     # Display the image with limited width using st.image
-    st.image(img_buf, width=max_width)
+    st.image(img_buf2, width=max_width)
+
+
 
     # Add a "Made by" section at the bottom
     st.markdown("---")
     made_by_text = "Made by: [Athanasios Kouras]()"
     st.markdown(made_by_text, unsafe_allow_html=True)
-
 
 if __name__ == "__main__":
     main()
