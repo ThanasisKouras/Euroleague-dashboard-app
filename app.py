@@ -30,8 +30,17 @@ from euroleague_api.team_stats import get_team_stats_single_season
 # Function to get data from the API
 @st.cache_data(ttl=86400)  # 86400 seconds = 1 day
 def get_api_data(season, round_number):
-    # Team Standings
+    total = 35
     endpoint_standings = 'basicstandings'
+    try:
+        for i in range(1,total):
+            get_standings(season, i, endpoint_standings)
+    except:
+        check=i-1
+
+    round_number=check
+    # Team Standings
+
     team_standings_df = get_standings(season, round_number, endpoint_standings)
 
     # Team Stats
@@ -46,25 +55,7 @@ def get_api_data(season, round_number):
     statistic_mode = "PerGame"
     player_df = get_player_stats_single_season(endpoint_player_stats, season, phase_type_code, statistic_mode)
 
-    return team_standings_df, team_stats_df, player_df
-
-@repeat(every(30).seconds)
-def refresh_data():
-    # Reload the data using your get_api_data() function or any other data loading process you have
-    team_standings_df, team_stats_df, player_df = get_api_data(season=2023, round_number=15)
-
-    now = datetime.now()
-    last_refresh_time = now.strftime("%H:%M:%S")
-    print("Current Time =", last_refresh_time)
-
-    # Display the last refresh time in the Streamlit app
-    st.info(
-        f'All data used for calculations are from [euroleague-api](https://pypi.org/project/euroleague-api/), refreshing automatically. Last refresh: {last_refresh_time}',
-        icon="ℹ️")
-
-    return team_standings_df, team_stats_df, player_df
-    # You may need to update your Streamlit display functions to use the refreshed data
-
+    return team_standings_df, team_stats_df, player_df, round_number
 
 def get_team_kpis(team_totals_data, selected_team):
     # Get the KPIs for the selected team
@@ -191,12 +182,17 @@ def main():
 
     st.caption('This is an analytics Dashboard aimed to quickly provide a general knowledge on some of the most important metrics for each team playing in Euroleague.')
 
+    # Load data from api
+    team_standings_df, team_totals, players_data, round_number = get_api_data(season=2023,round_number=1)
 
+    # Display the last refresh time in the Streamlit app
+    st.info(
+        f'All data used for calculations are fetched from [euroleague-api](https://pypi.org/project/euroleague-api/), refreshing automatically. Latest Round : '+str(round_number),
+        icon="ℹ️")
 
     #team_standings_df, team_totals_data, opponent_totals_data = load_data()
 
-    # Load data from Excel files
-    team_standings_df, team_totals, players_data = refresh_data()
+
 
 
     # List of teams as buttons
