@@ -20,7 +20,6 @@ body {
 
 
 # Additional imports for API calls
-import pandas as pd
 from euroleague_api.standings import get_standings
 from euroleague_api.player_stats import get_player_stats_single_season
 from euroleague_api.team_stats import get_team_stats_single_season
@@ -255,11 +254,11 @@ def main():
     selected_team_data = team_standings_df[team_standings_df['club.tvCode'] == selected_team]
 
     # Calculate the average for 'pointsFor' and 'pointsAgainst'
-    avg_points_for = selected_team_data['pointsFor'].sum() / selected_team_data['gamesPlayed'].sum()
+    #avg_points_for = selected_team_data['pointsFor'].sum() / selected_team_data['gamesPlayed'].sum()
 
     with col1:
 
-        points_per_game_html = f"<div style='{box_style}'><p style='font-size:16px;'>POINTS PER GAME</p><p style='font-size:28px;'>{avg_points_for:.1f}</p></div>"
+        points_per_game_html = f"<div style='{box_style}'><p style='font-size:16px;'>POINTS PER GAME</p><p style='font-size:28px;'>{team_kpis['pointsScored']:.1f}</p></div>"
         points_per_game_ranking_html = f"<div style='{box_style6}'><p style='font-size:16px;'>RANKING : {team_kpis['pointsScored_Ranking']:}</p></div>"
 
         st.markdown(points_per_game_html, unsafe_allow_html=True)
@@ -481,7 +480,7 @@ def main():
     st.divider()
 
     # Calculate the average for 'pointsFor' and 'pointsAgainst'
-    avg_points_for = selected_team_data['pointsFor'].sum() / selected_team_data['gamesPlayed'].sum()
+    avg_points_for = team_kpis['pointsScored']
     avg_points_against = selected_team_data['pointsAgainst'].sum() / selected_team_data['gamesPlayed'].sum()
 
     # Combine the average points for and against into a DataFrame
