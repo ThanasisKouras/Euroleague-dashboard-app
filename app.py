@@ -27,7 +27,7 @@ from euroleague_api.team_stats import get_team_stats_single_season
 
 
 # Function to get data from the API
-@st.cache_data(ttl=86400)  # 86400 seconds = 1 day
+@st.cache_data(ttl=1400)  # 86400 seconds = 1 day
 def get_api_data(season, round_number):
     total = 35
     endpoint_standings = 'basicstandings'
