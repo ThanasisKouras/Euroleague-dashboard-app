@@ -27,7 +27,7 @@ from euroleague_api.team_stats import get_team_stats_single_season
 
 
 # Function to get data from the API
-@st.cache_data(ttl=1400)  # 86400 seconds = 1 day
+@st.cache_data(ttl=1800)  # 86400 seconds = 1 day
 def get_api_data(season, round_number):
     total = 35
     endpoint_standings = 'basicstandings'
@@ -235,8 +235,8 @@ def main():
 
     # Check if the button is clicked and show the standings table in the sidebar
     if show_standings_button:
-        st.sidebar.table(team_standings_df[['position', 'club.editorialName', 'gamesPlayed']].rename(
-            columns={'position': 'Position', 'club.editorialName': 'Team', 'gamesPlayed': 'Games'}
+        st.sidebar.table(team_standings_df[['position', 'club.editorialName', 'gamesPlayed','gamesWon','gamesLost']].rename(
+            columns={'position': 'Position', 'club.editorialName': 'Team', 'gamesPlayed': 'Games', 'gamesWon': 'Won', 'gamesLost': 'Lost'}
         ).set_index('Position', drop=True))
 
     # Display KPIs for the selected team
@@ -531,7 +531,7 @@ def main():
 
     # Add a "Made by" section at the bottom
     st.markdown("---")
-    made_by_text = "Made by: [Athanasios Kouras]()"
+    made_by_text = "Made by: [Athanasios Kouras](https://www.linkedin.com/in/athanasios-kouras-276b17214/)"
     st.markdown(made_by_text, unsafe_allow_html=True)
 
 if __name__ == "__main__":
