@@ -1,7 +1,8 @@
 # Euroleague-dashboard-app
 A Euroleague analytics application, refreshing automatically using data from [euroleague-api](https://pypi.org/project/euroleague-api/).
 This application aims to quickly provide basic & advanced data analysis for each euroleague team for any selected season. (Currently season 2023-2024 is selected)
-
+# View the live web-app :
+  **URL:** https://euroleague-dashboard.streamlit.app/
 ## How to read the Euroleague Dashboard Analytics app :
 
 - On the left side of the app a selection button for each team is available. Selecting a team shows specific data for this team
