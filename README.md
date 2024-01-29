@@ -7,7 +7,7 @@ This application aims to quickly provide basic & advanced data analysis for each
 
 - On the left side of the app a selection button for each team is available. Selecting a team shows specific data for this team
   - The button **Show Standings** shows the overall standings on the board and how many Wins / Losses each team has.
-- Basic **KPI** are used for each team to show the performance on the most important stats. **Ranking** calculations are used among others to show team standings on each section. Other calculations such as **assists/turnovers ratio**, **last 5 games form**, **Wins/Losses** based on Home/Away give an overview on how the selected team perfoms under certain circumstances
+- Basic **KPIs** are used for each team to show the performance on the most important stats. **Ranking** calculations are used among others to show team standings on each section. Other calculations such as **assists/turnovers ratio**, **last 5 games form**, **Wins/Losses** based on Home/Away give an overview on how the selected team perfoms under certain circumstances
 - For each team selected, 3 top players are shown based on the **PIR (Performance Index Rating)**. Additionally total stats (Pts/Rebs/Ast) are shown for each one of these players
 - Tables showing the top 5 performing players for each team in **Points, Rebounds, Assists, Steals**
 - The **Chart Section** shows the contribution on scoring for most players to analyse if the impact of a player is crucial or not. It also shows how many points each team scores on average, and how many points concedes on each game
