@@ -20,7 +20,7 @@ body {
 
 
 # Additional imports for API calls
-from euroleague_api import get_standings
+from euroleague_api import standings
 from euroleague_api.player_stats import get_player_stats_single_season
 from euroleague_api.team_stats import get_team_stats_single_season
 
@@ -33,14 +33,14 @@ def get_api_data(season, round_number):
     endpoint_standings = 'basicstandings'
     try:
         for i in range(1,total):
-            get_standings(season, i, endpoint_standings)
+            standings(season, i, endpoint_standings)
     except:
         check=i-1
 
     round_number=check
     # Team Standings
 
-    team_standings_df = get_standings(season, round_number, endpoint_standings)
+    team_standings_df = standings(season, round_number, endpoint_standings)
 
     # Team Stats
     endpoint_team_stats = "traditional"
