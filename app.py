@@ -35,14 +35,14 @@ def get_api_data(season, round_number):
     endpoint_standings = 'basicstandings'
     try:
         for i in range(1,total):
-            standings(season, i, endpoint_standings)
+            get_standings(season, i, endpoint_standings)
     except:
         check=i-1
 
     round_number=check
     # Team Standings
 
-    team_standings_df = standings(season, round_number, endpoint_standings)
+    team_standings_df = get_standings(season, round_number, endpoint_standings)
 
     # Team Stats
     endpoint_team_stats = "traditional"
