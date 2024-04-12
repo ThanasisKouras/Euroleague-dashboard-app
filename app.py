@@ -21,7 +21,8 @@ body {
 
 # Additional imports for API calls
 from euroleague_api import standings
-from euroleague_api import get_player_stats_single_season
+from euroleague_api import player_stats
+#get_player_stats_single_season
 from euroleague_api import get_team_stats_single_season
 
 
