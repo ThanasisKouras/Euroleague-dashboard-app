@@ -32,13 +32,16 @@ from euroleague_api.team_stats import get_team_stats_single_season
 def get_api_data(season, round_number):
     total = 34
     endpoint_standings = 'basicstandings'
+    check = None  # Initialize check to None
     try:
-        for i in range(1,total):
-            get_standings(season, i, endpoint_standings)
-    except:
-        check=i-1
+        for i in range(1, total + 1):  # Adjust the range to include 34
+            standings = get_standings(season, i, endpoint_standings)
+            if standings is not None:
+                check = i  # Update check to the latest available round number
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-    round_number=check
+    round_number = check if check is not None else round_number  # Use check if it's not None
     # Team Standings
 
     team_standings_df = get_standings(season, round_number, endpoint_standings)
@@ -180,7 +183,7 @@ def main():
 
 
 
-    st.caption('This is an analytics Dashboard aimed to quickly provide a general knowledge on some of the most important metrics for each team playing in Euroleague.')
+    st.caption('This is an analytics Dashboard aimed to quickly provide a general overview on some of the most important metrics for each team playing in Euroleague.')
 
     # Load data from api
     team_standings_df, team_totals, players_data, round_number = get_api_data(season=2023,round_number=1)
