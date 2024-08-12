@@ -12,3 +12,5 @@ This application aims to quickly provide basic & advanced data analysis for each
 - Tables showing the top 5 performing players for each team in **Points, Rebounds, Assists, Steals**
 - The **Chart Section** shows the contribution on scoring for most players to analyse if the impact of a player is crucial or not. It also shows how many points each team scores on average, and how many points concedes on each game
   This dashboard can be updated in the future for more charts to be shown.
+
+<img src="app-browsing.gif">
