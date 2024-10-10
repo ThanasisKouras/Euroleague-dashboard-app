@@ -3,6 +3,6 @@ pandas
 matplotlib
 seaborn
 openpyxl
-euroleague-api==0.0.9
+euroleague-api==0.0.13
 schedule
 datetime
