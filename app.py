@@ -49,7 +49,8 @@ def get_api_data(season):
 
     # Get team standings
     team_standings_df = standings_api.get_standings(season=season, round_number=round_number)
-
+    print(
+        f"Team Standings DataFrame for Round {round_number}: {team_standings_df}")  # Debug: Print team standings dataframe
     # Get team stats
     team_stats_df = team_stats_api.get_team_stats_single_season(
         endpoint='traditional',
@@ -166,34 +167,20 @@ def load_team_logos(folder_path):
 # Function to display team logo
 def display_team_logo(team_logos, selected_team):
     if selected_team in team_logos:
-        st.sidebar.image(team_logos[selected_team], use_column_width=True, output_format="PNG")
+        st.image(team_logos[selected_team], width=150, output_format="PNG")
     else:
-        st.sidebar.warning(f"Logo not found for {selected_team}")
+        st.warning(f"Logo not found for {selected_team}")
 
 # Define the path to the folder containing team logos
-#logos_folder_path = "logos"
+logos_folder_path = "logos"
 
 # Load team logos
-#team_logos = load_team_logos(logos_folder_path)
+team_logos = load_team_logos(logos_folder_path)
 
 
 def main():
     st.set_page_config(page_title="Euroleague Dashboard", page_icon=":basketball:", layout='wide')
 
-    # Apply the custom CSS for button size
-    custom_css = """
-    <style>
-    .big-button {
-        font-size: 20px; /* Change font size */
-        padding: 15px 30px; /* Change padding */
-        background-color: #f39c12; /* Change background color */
-        color: white; /* Change text color */
-        border: none; /* Remove border */
-        border-radius: 5px; /* Rounded corners */
-        cursor: pointer; /* Cursor pointer on hover */
-    }
-    </style>
-    """
 
     st.markdown(custom_css, unsafe_allow_html=True)
 
@@ -204,17 +191,21 @@ def main():
 
     # Create a session state variable for the selected season
     if 'selected_season' not in st.session_state:
-        st.session_state.selected_season = 2023  # Default to 2023
+        st.session_state.selected_season = 2024  # Default to 2024
 
     # Load data based on selected season
     team_standings_df, team_totals, players_data, round_number = get_api_data(season=st.session_state.selected_season)
 
-    # Display the last refresh time in the Streamlit app with selected season
+
     st.info(
-        f'All data used for calculations are fetched from [euroleague-api](https://pypi.org/project/euroleague-api/), refreshing automatically. \n\n'
-        f'**Selected Season:** {st.session_state.selected_season}    \n'
-        f'**Latest Round:** {round_number}',
+        f'All data used for calculations are fetched from [euroleague-api](https://pypi.org/project/euroleague-api/), refreshing automatically.',
         icon="ℹ️"
+    )
+
+    # Display the last refresh time in the app with selected season
+    st.success(
+        f'#### **Selected Season:** {st.session_state.selected_season}    \n'
+        f'#### **Latest Round:** {round_number}'
     )
 
     # Buttons for season selection under the info message
@@ -223,10 +214,14 @@ def main():
     with col1:
         if st.button('Season 2023'):
             st.session_state.selected_season = 2023  # Set selected season to 2023
+            team_standings_df, team_totals, players_data, round_number = get_api_data(
+                season=st.session_state.selected_season)
 
     with col2:
         if st.button('Season 2024'):
             st.session_state.selected_season = 2024  # Set selected season to 2024
+            team_standings_df, team_totals, players_data, round_number = get_api_data(
+                season=st.session_state.selected_season)
 
     # List of teams as buttons
     teams = team_standings_df['club.tvCode'].unique()
@@ -234,6 +229,8 @@ def main():
     # Add a team selection dropdown to the sidebar with custom styling
     st.markdown("<h1 style='text-align: center;'>Select Team</h1>", unsafe_allow_html=True)
     selected_team = st.selectbox("", teams)
+
+    display_team_logo(team_logos, selected_team)
 
     # Button to show/hide standings table
     show_standings_button = st.button("Show Standings")
@@ -245,6 +242,8 @@ def main():
     st.header("Top Team for Each Metric (on Average)", divider='orange')
 
     top_teams_layout = st.columns(6)
+    pd.set_option('display.max_columns', None)  # None means no limit
+
 
     for i, (kpi, (metric_value, team_name)) in enumerate(top_teams.items()):
         with top_teams_layout[i]:
@@ -257,14 +256,14 @@ def main():
             else:
                 metric_html = f"<div style='{box_style_metric}'><p style='font-size:16px;'>{kpi}</p><p style='font-size:28px;'>{metric_value}</p></div>"
 
-            ranking_html = f"<div style='{box_style_ranking}'><p style='font-size:16px;'>RANKING :1 ({team_standings_df['club.editorialName'].iloc[team_standings_df[team_standings_df['club.tvCode'] == team_name].index[0]]})</p></div>"
+            ranking_html = f"<div style='{box_style_ranking}'><p style='font-size:16px;'>RANKING :1 ({team_standings_df['club.abbreviatedName'].iloc[team_standings_df[team_standings_df['club.tvCode'] == team_name].index[0]]})</p></div>"
 
             st.markdown(metric_html, unsafe_allow_html=True)
             st.markdown(ranking_html, unsafe_allow_html=True)
 
     # Check if the button is clicked and show the standings table in the sidebar
     if show_standings_button:
-        st.sidebar.table(team_standings_df[['position', 'club.editorialName', 'gamesPlayed','gamesWon','gamesLost']].rename(
+        st.sidebar.table(team_standings_df[['position', 'club.abbreviatedName', 'gamesPlayed','gamesWon','gamesLost']].rename(
             columns={'position': 'Position', 'club.editorialName': 'Team', 'gamesPlayed': 'Games', 'gamesWon': 'Won', 'gamesLost': 'Lost'}
         ).set_index('Position', drop=True))
 
