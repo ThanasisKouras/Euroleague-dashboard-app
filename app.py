@@ -230,13 +230,13 @@ def main():
     with col1:
         if st.button('Season 2023'):
             st.session_state.selected_season = 2023  # Set selected season to 2023
-            team_standings_df, team_totals, players_data, round_number = get_api_data(
+            team_standings_df, team_stats_df, advanced_team_stats_df, player_df, advanced_player_df, round_number = get_api_data(
                 season=st.session_state.selected_season)
 
     with col2:
         if st.button('Season 2024'):
             st.session_state.selected_season = 2024  # Set selected season to 2024
-            team_standings_df, team_totals, players_data, round_number = get_api_data(
+            team_standings_df, team_stats_df, advanced_team_stats_df, player_df, advanced_player_df, round_number = get_api_data(
                 season=st.session_state.selected_season)
 
     # List of teams as buttons
@@ -647,7 +647,12 @@ def main():
         textfont_size=10,  # Make label text smaller
         textfont_color='#232b2b'
     )
-    fig_3pm.update_layout(showlegend=False)  # Remove legend
+    fig_3pm.update_layout(
+        showlegend=False,  # Remove legend
+        paper_bgcolor='#D3D3D3',  # Set a light background color for the entire figure
+        plot_bgcolor='#D3D3D3',  # Set the same or a slightly different color for the plotting area
+        title_font = dict(color='#232b2b')
+    )
 
     # Create Pie Chart for Two-Point Makes (2PM)
     fig_2pm = px.pie(
@@ -662,7 +667,12 @@ def main():
         textfont_size=10,  # Make label text smaller
         textfont_color='#232b2b'
     )
-    fig_2pm.update_layout(showlegend=False)  # Remove legend
+    fig_2pm.update_layout(
+        showlegend=False,  # Remove legend
+        paper_bgcolor='#D3D3D3',  # Set a light background color for the entire figure
+        plot_bgcolor='#D3D3D3',  # Set the same or a slightly different color for the plotting area
+        title_font = dict(color='#232b2b')
+    )
 
     # Create Pie Chart for Free Throws Made (FTM)
     fig_ftm = px.pie(
@@ -677,7 +687,12 @@ def main():
         textfont_size=10,  # Make label text smaller
         textfont_color='#232b2b'
     )
-    fig_ftm.update_layout(showlegend=False)  # Remove legend
+    fig_ftm.update_layout(
+        showlegend=False,  # Remove legend
+        paper_bgcolor='#D3D3D3',  # Set a light background color for the entire figure
+        plot_bgcolor='#D3D3D3',  # Set the same or a slightly different color for the plotting area
+        title_font = dict(color='#232b2b')
+    )
 
     # Use Streamlit columns to display the charts side by side
     col1, col2, col3 = st.columns(3)
