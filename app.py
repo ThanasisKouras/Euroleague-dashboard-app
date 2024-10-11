@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import os
+import plotly.express as px
 import time
 from schedule import every, repeat, run_pending
 from datetime import datetime
@@ -49,17 +48,24 @@ def get_api_data(season):
 
     # Get team standings
     team_standings_df = standings_api.get_standings(season=season, round_number=round_number)
-    print(
-        f"Team Standings DataFrame for Round {round_number}: {team_standings_df}")  # Debug: Print team standings dataframe
-    # Get team stats
+
+    # Get TRADITIONAL team stats
     team_stats_df = team_stats_api.get_team_stats_single_season(
         endpoint='traditional',
         season=season,
         phase_type_code='RS',
         statistic_mode="PerGame"
     )
+    # Get ADVANCED team stats
+    advanced_team_stats_df = team_stats_api.get_team_stats_single_season(
+        endpoint='advanced',
+        season=season,
+        phase_type_code='RS',
+        statistic_mode="Accumulated"
+    )
 
-    # Get player stats
+
+    # Get TRADITIONAL player stats
     player_df = player_stats_api.get_player_stats_single_season(
         endpoint='traditional',
         season=season,
@@ -67,7 +73,15 @@ def get_api_data(season):
         statistic_mode="PerGame"
     )
 
-    return team_standings_df, team_stats_df, player_df, round_number
+    # Get ADVANCED player stats
+    advanced_player_df = player_stats_api.get_player_stats_single_season(
+        endpoint='advanced',
+        season=season,
+        phase_type_code='RS',
+        statistic_mode="Accumulated"
+    )
+
+    return team_standings_df, team_stats_df, advanced_team_stats_df, player_df, advanced_player_df, round_number
 
 def get_team_kpis(team_totals_data, selected_team):
     # Get the KPIs for the selected team
@@ -194,8 +208,10 @@ def main():
         st.session_state.selected_season = 2024  # Default to 2024
 
     # Load data based on selected season
-    team_standings_df, team_totals, players_data, round_number = get_api_data(season=st.session_state.selected_season)
+    team_standings_df, team_totals, advanced_team_stats_df, players_data, advanced_player_df,  round_number = get_api_data(season=st.session_state.selected_season)
 
+    pd.set_option('display.max_columns', 500)
+    print(advanced_player_df.head())
 
     st.info(
         f'All data used for calculations are fetched from [euroleague-api](https://pypi.org/project/euroleague-api/), refreshing automatically.',
@@ -228,7 +244,7 @@ def main():
 
     # Add a team selection dropdown to the sidebar with custom styling
     st.markdown("<h1 style='text-align: center;'>Select Team</h1>", unsafe_allow_html=True)
-    selected_team = st.selectbox("", teams)
+    selected_team = st.selectbox("Select Team", teams, key='top_team_selectbox')
 
     display_team_logo(team_logos, selected_team)
 
@@ -465,45 +481,49 @@ def main():
         top_spg_players = get_top_players(players_data, selected_team, 'steals', 'Steals')
         st.table(top_spg_players.style.format({'Steals': '{:.2f}'}))
 
+
+    # Add a team selection dropdown to the sidebar with custom styling
+    st.markdown("<h1 style='text-align: center;'>Select Team for Charts</h1>", unsafe_allow_html=True)
+    selected_team = st.selectbox("Select Team for Charts", teams,
+                                           key='chart_team_selectbox')  # Unique key added here
+
     # Display charts for the selected team
-    st.header(f"Charts for {selected_team} ", divider='orange')
+    st.header(f"Charts for {selected_team}", divider='orange')
+
     # Get scoring distribution for selected team from team totals
     scoring_distribution_team_totals = get_scoring_distribution(players_data, selected_team)
 
-    # Set the maximum width and height for both charts
-    max_width = 800
-    max_height = 400
+    # Create a Plotly bar chart
+    fig = px.bar(
+        scoring_distribution_team_totals,
+        x='player.name',
+        y='Percentage of Total Points',
+        title=f'Scoring Distribution for Team: {selected_team}',
+        labels={'player.name': 'Player', 'Percentage of Total Points': 'Percentage of Total Points'},
+        color_discrete_sequence=['#32612D']
+    )
 
-    # Create a vertical bar plot using Seaborn for team totals
-    plt.figure(figsize=(min(max_width / 80, len(scoring_distribution_team_totals)), min(max_height / 6, 6)))
-    sns.barplot(x='player.name', y='Percentage of Total Points', data=scoring_distribution_team_totals,
-                palette='viridis')
-    plt.xlabel('')
-    plt.ylabel('Percentage of Total Points')
-    plt.title(f'Scoring Distribution for Team: {selected_team}')
-    plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
 
-    # Ensure tight layout
-    plt.tight_layout()
+    # Update layout
+    fig.update_layout(
+        xaxis_title='',  # Hide x-axis title
+        showlegend=False,  # Hide legend
+        xaxis_tickangle=-45,  # Rotate x-axis labels for better readability
+        plot_bgcolor='#fbf7f5',  # Set background color
+        height=400,  # Set a maximum height
+    )
 
-    # Access the Matplotlib figure
-    fig1 = plt.gcf()
+    fig.update_traces(textposition='outside', width=0.5)
 
-    # Set the background color
-    fig1.patch.set_facecolor('#F0F0F0')  # Replace with your desired color
-
-    # Save the Matplotlib figure to a BytesIO object
-    img_buf1 = io.BytesIO()
-    fig1.savefig(img_buf1, format='png')
-    img_buf1.seek(0)
-
-    # Display the image with limited width using st.image
-    st.image(img_buf1, width=max_width)
+    # Display the Plotly figure in Streamlit
+    st.plotly_chart(fig, use_container_width=True)  # Responsive chart
 
 
 
     # Filter the DataFrame for the selected team
     selected_team_data = team_standings_df[team_standings_df['club.tvCode'] == selected_team]
+    selected_team_data_advanced = advanced_team_stats_df[advanced_team_stats_df['team.tvCodes'] == selected_team]
+    selected_team_data_players = advanced_player_df[advanced_player_df['player.team.tvCodes'] == selected_team]
 
     st.divider()
 
@@ -517,44 +537,160 @@ def main():
         'Value': [avg_points_for, avg_points_against]
     })
 
-    # Set a color palette for the bars
+    # Set colors for the bars
     colors = ['#32612D', '#FF0000']
 
-    # Adjust the width of the bars (e.g., 0.8 for 80% of the available space)
-    bar_width = 0.4
+    fig2 = px.bar(
+        avg_data,
+        x='Metric',
+        y='Value',
+        title=f'Average Points SCORED vs CONCEDED for Team: {selected_team}',
+        color='Metric',
+        color_discrete_sequence=colors,
+        labels={'Metric': 'Metrics', 'Value': 'Average Points'},  # Added label for Metric
+        text='Value'  # Display the average points as text on the bars
+    )
 
-    # Create a vertical bar plot
-    plt.figure(figsize=(min(max_width / 80, len(scoring_distribution_team_totals)), min(max_height / 6, 6)))
-    sns.barplot(x='Metric', y='Value', data=avg_data, palette=colors, width=bar_width)
+    # Update layout to customize appearance
+    fig2.update_layout(
+        xaxis_title='',  # Hide x-axis title
+        yaxis_title='Average Points',  # Y-axis title
+        plot_bgcolor='#fbf7f5',  # Set background color
+        height=500,  # Increase height for more space (adjust as needed)
+        showlegend=False,  # Hide legend
+        margin=dict(t=60, b=20, l=40, r=20)  # Add margin to the plot
+    )
 
-    # Add labels to each bar
-    for i, value in enumerate(avg_data['Value']):
-        plt.text(i, value + 0.1, f'{value:.1f}', ha='center', va='bottom')
+    # Update the text position above the bars
+    fig2.update_traces(
+        textposition='outside',  # Position text above bars
+        width=0.2,
+        textfont_size=16,
+        textfont_color='#232b2b'  # Set text color to black
+    )
 
-    plt.xlabel(' ')
-    plt.ylabel('Average Points')
-    plt.title(f'Averages Points SCORED vs CONCEDED for Team: {selected_team}')
+    # Customize text appearance
+    fig2.update_traces(textfont_size=16)  # Set font size
 
-    # Display the plot
-    plt.show()
+    # Display the Plotly figure in Streamlit
+    st.plotly_chart(fig2, use_container_width=True)  # Responsive chart
 
-    # Ensure tight layout
-    plt.tight_layout()
+    st.divider()
 
-    # Access the Matplotlib figure
-    fig2 = plt.gcf()
+    euroleague_colors = ['#6BAF85', '#E7A86D', '#7A6A9D']
 
-    # Set the background color
-    fig2.patch.set_facecolor('#F0F0F0')  # Replace with your desired color
+    # Extract the percentages for two-pointers, three-pointers, and free throws
+    points_from_two = selected_team_data_advanced['pointsFromTwoPointersPercentage'].values[0].strip('%')
+    points_from_three = selected_team_data_advanced['pointsFromThreePointersPercentage'].values[0].strip('%')
+    points_from_free = selected_team_data_advanced['pointsFromFreeThrowsPercentage'].values[0].strip('%')
 
-    # Save the Matplotlib figure to a BytesIO object
-    img_buf2 = io.BytesIO()
-    fig2.savefig(img_buf2, format='png')
-    img_buf2.seek(0)
+    # Convert the string values to float
+    points_from_two = float(points_from_two)
+    points_from_three = float(points_from_three)
+    points_from_free = float(points_from_free)
 
-    # Display the image with limited width using st.image
-    st.image(img_buf2, width=max_width)
+    # Create a donut chart using the actual values from the data
+    fig3 = px.pie(
+        names=['Two-Pointers', 'Three-Pointers', 'Free Throws'],
+        values=[points_from_two, points_from_three, points_from_free],
+        title=f'Shot Distribution for {selected_team}',
+        color_discrete_sequence=euroleague_colors,
+        hole=0.5  # Set the hole size for the donut chart
+    )
 
+    # Update traces for text properties
+    fig3.update_traces(
+        textfont_size=14,  # Set text size to 16
+        textfont_color='#232b2b',  # Set text color to #232b2b
+        textinfo='percent+label'  # Display percentage and label
+    )
+
+    # Hide the legend if not needed
+    fig3.update_layout(showlegend=False)
+
+    # Display the donut chart in Streamlit
+    st.plotly_chart(fig3, use_container_width=True)
+
+    st.divider()
+
+    # Assuming 'selected_team' contains the selected team's TV code (e.g., 'EA7', 'PAO', etc.)
+    selected_team_data_players = advanced_player_df[advanced_player_df['player.team.tvCodes'] == selected_team]
+
+    # Convert necessary columns to numeric after stripping '%'
+    selected_team_data_players['threePointAttemptsRatio'] = selected_team_data_players[
+        'threePointAttemptsRatio'].str.strip('%').astype(float)
+    selected_team_data_players['twoPointAttemptsRatio'] = selected_team_data_players['twoPointAttemptsRatio'].str.strip(
+        '%').astype(float)
+    selected_team_data_players['freeThrowsRate'] = selected_team_data_players['freeThrowsRate'].str.strip('%').astype(
+        float)
+
+    # Sort by highest three-point, two-point, and free-throw made rates
+    top_3pm_players = selected_team_data_players.sort_values(by='threePointAttemptsRatio', ascending=False).head(7)
+    top_2pm_players = selected_team_data_players.sort_values(by='twoPointAttemptsRatio', ascending=False).head(7)
+    top_ftm_players = selected_team_data_players.sort_values(by='freeThrowsRate', ascending=False).head(7)
+
+    # Define custom color palettes
+    three_point_colors = ['#4C7A5C', '#6BAF85', '#A2D3A4']  # Custom colors for Top 3-Point Makers
+    two_point_colors = ['#D68A3D', '#E7A86D', '#F0B89C']  # Custom colors for Top 2-Point Makers
+    free_throw_colors = ['#6A5ACD', '#7A6A9D', '#BFA5D8']  # Custom colors for Top Free-Throw Makers
+
+    # Create Pie Chart for Three-Point Makes (3PM)
+    fig_3pm = px.pie(
+        top_3pm_players,
+        names='player.name',
+        values='threePointAttemptsRatio',
+        title='Top 3-Point Makers (%)',
+        color_discrete_sequence=three_point_colors
+    )
+    fig_3pm.update_traces(
+        textinfo='value+label',
+        textfont_size=10,  # Make label text smaller
+        textfont_color='#232b2b'
+    )
+    fig_3pm.update_layout(showlegend=False)  # Remove legend
+
+    # Create Pie Chart for Two-Point Makes (2PM)
+    fig_2pm = px.pie(
+        top_2pm_players,
+        names='player.name',
+        values='twoPointAttemptsRatio',
+        title='Top 2-Point Makers (%)',
+        color_discrete_sequence=two_point_colors
+    )
+    fig_2pm.update_traces(
+        textinfo='value+label',
+        textfont_size=10,  # Make label text smaller
+        textfont_color='#232b2b'
+    )
+    fig_2pm.update_layout(showlegend=False)  # Remove legend
+
+    # Create Pie Chart for Free Throws Made (FTM)
+    fig_ftm = px.pie(
+        top_ftm_players,
+        names='player.name',
+        values='freeThrowsRate',
+        title='Top Free-Throw Makers (%)',
+        color_discrete_sequence=free_throw_colors
+    )
+    fig_ftm.update_traces(
+        textinfo='value+label',
+        textfont_size=10,  # Make label text smaller
+        textfont_color='#232b2b'
+    )
+    fig_ftm.update_layout(showlegend=False)  # Remove legend
+
+    # Use Streamlit columns to display the charts side by side
+    col1, col2, col3 = st.columns(3)
+
+    # Display each pie chart in its respective column
+    with col1:
+        st.plotly_chart(fig_3pm, use_container_width=True)
+
+    with col2:
+        st.plotly_chart(fig_2pm, use_container_width=True)
+
+    with col3:
+        st.plotly_chart(fig_ftm, use_container_width=True)
 
 
     # Add a "Made by" section at the bottom
