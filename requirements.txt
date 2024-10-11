@@ -1,7 +1,7 @@
 streamlit
 pandas
 matplotlib
-seaborn
+plotly
 openpyxl
 euroleague-api==0.0.13
 schedule
