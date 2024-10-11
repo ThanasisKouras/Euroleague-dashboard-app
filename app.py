@@ -649,8 +649,8 @@ def main():
     )
     fig_3pm.update_layout(
         showlegend=False,  # Remove legend
-        paper_bgcolor='#D3D3D3',  # Set a light background color for the entire figure
-        plot_bgcolor='#D3D3D3',  # Set the same or a slightly different color for the plotting area
+        paper_bgcolor='#f5f1f1',  # Set a light background color for the entire figure
+        plot_bgcolor='#f5f1f1',  # Set the same or a slightly different color for the plotting area
         title_font = dict(color='#232b2b')
     )
 
@@ -669,8 +669,8 @@ def main():
     )
     fig_2pm.update_layout(
         showlegend=False,  # Remove legend
-        paper_bgcolor='#D3D3D3',  # Set a light background color for the entire figure
-        plot_bgcolor='#D3D3D3',  # Set the same or a slightly different color for the plotting area
+        paper_bgcolor='#f5f1f1',  # Set a light background color for the entire figure
+        plot_bgcolor='#f5f1f1',  # Set the same or a slightly different color for the plotting area
         title_font = dict(color='#232b2b')
     )
 
@@ -689,8 +689,8 @@ def main():
     )
     fig_ftm.update_layout(
         showlegend=False,  # Remove legend
-        paper_bgcolor='#D3D3D3',  # Set a light background color for the entire figure
-        plot_bgcolor='#D3D3D3',  # Set the same or a slightly different color for the plotting area
+        paper_bgcolor='#f5f1f1',  # Set a light background color for the entire figure
+        plot_bgcolor='#f5f1f1',  # Set the same or a slightly different color for the plotting area
         title_font = dict(color='#232b2b')
     )
 
